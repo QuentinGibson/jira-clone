@@ -1,4 +1,6 @@
+import AuthenticationProtected from "@/components/AuthenticationProtected";
 import AuthProvider from "@/components/AuthProvider";
+import { Toaster } from "@/components/ui/sonner";
 import "@/styles/globals.css";
 
 import { type Metadata } from "next";
@@ -20,7 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${source_code_pro.className}`}>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          <AuthenticationProtected>
+            {children}
+            <Toaster />
+          </AuthenticationProtected>
+        </AuthProvider>
       </body>
     </html>
   );

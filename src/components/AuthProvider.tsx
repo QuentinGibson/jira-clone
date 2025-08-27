@@ -7,12 +7,8 @@ export default function AuthProvider({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body>
-        <ClerkProvider>
-          <ConvexClientProvider>{children}</ConvexClientProvider>
-        </ClerkProvider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <ConvexClientProvider>{children}</ConvexClientProvider>
+    </ClerkProvider>
   );
 }
