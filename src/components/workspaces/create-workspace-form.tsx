@@ -4,6 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { createWorkspaceSchema } from "@/zodSchemas";
 import type z from "zod";
+import { workspaecImageOptimization } from "@/lib/workspaceImageOptimization";
 import { useConvexMutation } from "@convex-dev/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
@@ -23,8 +24,8 @@ import { Button } from "../ui/button";
 import { toast } from "sonner";
 import Image from "next/image";
 import { Avatar, AvatarFallback } from "../ui/avatar";
-import { ImageIcon } from "lucide-react";
-import { useRef } from "react";
+import { ImageIcon, Loader } from "lucide-react";
+import { useRef, useState } from "react";
 
 interface CreateWorkspaceFormProps {
   onCancel?: () => void;
@@ -32,6 +33,7 @@ interface CreateWorkspaceFormProps {
 
 function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof createWorkspaceSchema>>({
     resolver: zodResolver(createWorkspaceSchema),
     defaultValues: {
@@ -39,29 +41,47 @@ function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
       thumbnail: undefined,
     },
   });
-  const { mutate, isPending } = useMutation({
+  const { mutate, isPending, mutateAsync } = useMutation({
     mutationFn: useConvexMutation(api.workspaces.create),
     onSuccess: () => {
       toast.success("Workspace Created");
       form.reset();
     },
-    onError: () => {
-      toast.error("Failed to create Workspace");
+    onError: (error) => {
+      let errorMessage = "Failed to create workspace";
+      
+      if (error?.message?.includes("not unique")) {
+        errorMessage = "A workspace with this name already exists. Please choose a different name.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
+      form.setError("name", { message: errorMessage });
     },
   });
-  const { mutateAsync: generateUploadUrl } = useMutation({
-    mutationFn: useConvexMutation(api.upload.generateUploadUrl),
-  });
-  const onSubmit = async (values: z.infer<typeof createWorkspaceSchema>) => {
-    if (!values.thumbnail) mutate({ name: values.name });
-    const postUrl = await generateUploadUrl({});
-    const results = await fetch(postUrl, {
-      method: "POST",
-      headers: { "Content-Type": values.thumbnail.type },
-      body: values.thumbnail,
+  const { mutateAsync: generateUploadUrl, isPending: isUploadingFile } =
+    useMutation({
+      mutationFn: useConvexMutation(api.upload.generateUploadUrl),
     });
-    const { storageId } = await results.json();
-    mutate({ name: values.name, thumbnail: storageId });
+  const onSubmit = async (values: z.infer<typeof createWorkspaceSchema>) => {
+    setIsSubmitting(true);
+    try {
+      if (!values.thumbnail) {
+        mutate({ name: values.name });
+        return;
+      }
+      const optimizedImage = await workspaecImageOptimization(values.thumbnail);
+      const postUrl = await generateUploadUrl({});
+      const results = await fetch(postUrl, {
+        method: "POST",
+        headers: { "Content-Type": optimizedImage.type },
+        body: optimizedImage,
+      });
+      const { storageId } = await results.json();
+      mutate({ name: values.name, thumbnail: storageId });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
   return (
     <Card className="h-full w-full border-none shadow-none">
@@ -136,7 +156,7 @@ function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
                         />
                         <Button
                           type="button"
-                          disabled={isPending}
+                          disabled={isSubmitting}
                           variant="secondary"
                           size="icon"
                           className="mt-2 w-fit"
@@ -156,13 +176,17 @@ function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
                   size="lg"
                   variant="secondary"
                   onClick={onCancel}
-                  disabled={isPending}
+                  disabled={isSubmitting}
                 >
                   Cancel
                 </Button>
 
-                <Button size="lg" disabled={isPending}>
-                  Submit
+                <Button size="lg" type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? (
+                    <Loader className="animate-spin" />
+                  ) : (
+                    "Submit"
+                  )}
                 </Button>
               </div>
             </div>

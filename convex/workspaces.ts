@@ -1,5 +1,6 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "./_generated/server";
+import { WorkspaceRole } from "../src/types.d.js";
 export const list = query({
   handler: async (ctx, {}) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -18,7 +19,7 @@ export const list = query({
 
     const workspaces = await ctx.db
       .query("workspaces")
-      .withIndex("by_user", (q) => q.eq("user", user._id))
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .collect();
     return Promise.all(
       workspaces.map(async (workspace) => {
@@ -60,10 +61,18 @@ export const create = mutation({
       );
     }
 
-    return await ctx.db.insert("workspaces", {
+    const workspaceId = await ctx.db.insert("workspaces", {
       name,
-      user: user._id,
+      userId: user._id,
       thumbnail,
     });
+
+    await ctx.db.insert("members", {
+      userId: user._id,
+      workspaceId,
+      role: WorkspaceRole.Admin,
+    });
+
+    return workspaceId;
   },
 });

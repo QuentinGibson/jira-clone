@@ -1,5 +1,12 @@
 import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
+import { WorkspaceRole } from "../src/types.d.js";
+
+export const workspaceRoleValidator = v.union(
+  v.literal(WorkspaceRole.Member),
+  v.literal(WorkspaceRole.Admin),
+);
+
 export default defineSchema({
   users: defineTable({
     name: v.string(),
@@ -8,6 +15,7 @@ export default defineSchema({
   members: defineTable({
     userId: v.id("users"),
     workspaceId: v.id("workspaces"),
+    role: workspaceRoleValidator,
   })
     .index("by_userId", ["userId"])
     .index("by_workspaceId", ["workspaceId"]),
