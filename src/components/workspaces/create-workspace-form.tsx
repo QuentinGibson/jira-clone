@@ -26,6 +26,8 @@ import Image from "next/image";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { ImageIcon, Loader } from "lucide-react";
 import { useRef, useState } from "react";
+import { useRouter, redirect } from "next/navigation";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
 
 interface CreateWorkspaceFormProps {
   onCancel?: () => void;
@@ -33,6 +35,7 @@ interface CreateWorkspaceFormProps {
 
 function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const { setWorkspaceId } = useWorkspaceId();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<z.infer<typeof createWorkspaceSchema>>({
     resolver: zodResolver(createWorkspaceSchema),
@@ -43,9 +46,11 @@ function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
   });
   const { mutateAsync: createWorkspaceAsync } = useMutation({
     mutationFn: useConvexMutation(api.workspaces.create),
-    onSuccess: () => {
+    onSuccess: (id: string) => {
       toast.success("Workspace Created");
       form.reset();
+      setWorkspaceId(id);
+      onCancel?.();
     },
     onError: (error) => {
       let errorMessage = "Failed to create workspace";

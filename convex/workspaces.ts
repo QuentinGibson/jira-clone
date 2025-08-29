@@ -77,3 +77,32 @@ export const create = mutation({
     return workspaceId;
   },
 });
+
+export const getWorkplaceById = query({
+  args: { id: v.id("workspaces") },
+  handler: async (ctx, { id }) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throw new ConvexError("Unauthorized");
+    }
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_token", (q) =>
+        q.eq("tokenIdentifier", identity.tokenIdentifier),
+      )
+      .unique();
+    if (!user) {
+      throw new ConvexError("Unauthorized");
+    }
+
+    const userMemberships = await ctx.db
+      .query("members")
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
+      .collect();
+    const hasMemberships = !!userMemberships.find(
+      (membership) => membership.workspaceId === id,
+    );
+    if (!hasMemberships) throw new ConvexError("Unauthorized");
+    return await ctx.db.get(id);
+  },
+});

@@ -1,6 +1,8 @@
-import { useParams } from "next/navigation";
+import { useQueryState } from "nuqs";
 
 export const useWorkspaceId = () => {
-  const params = useParams();
-  return params.useworkspaceId as string;
+  const [workspaceId, setWorkspaceId] = useQueryState("workspace", {
+    clearOnDefault: true,
+  });
+  return { workspaceId, setWorkspaceId };
 };

@@ -1,11 +1,8 @@
-import {
-  Sidebar,
-  SidebarProvider,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import type { ReactNode } from "react";
 import { AppSidebar } from "./app-sidebar";
 import { Navbar } from "./navbar";
+import CreateWorkspaceModal from "@/components/create-workspace-modal";
 
 interface LayoutProps {
   children: ReactNode;
@@ -13,6 +10,7 @@ interface LayoutProps {
 function Layout({ children }: LayoutProps) {
   return (
     <div className="min-h-screen">
+      <CreateWorkspaceModal />
       <div className="flex h-full w-full">
         <SidebarProvider>
           <AppSidebar />
