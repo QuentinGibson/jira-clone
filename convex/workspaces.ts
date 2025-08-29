@@ -51,6 +51,7 @@ export const create = mutation({
     if (!user) {
       throw new ConvexError("Unauthorized");
     }
+
     const workspace = await ctx.db
       .query("workspaces")
       .withIndex("by_name", (q) => q.eq("name", name))

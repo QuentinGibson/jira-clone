@@ -41,7 +41,7 @@ function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
       thumbnail: undefined,
     },
   });
-  const { mutate, isPending, mutateAsync } = useMutation({
+  const { mutateAsync: createWorkspaceAsync } = useMutation({
     mutationFn: useConvexMutation(api.workspaces.create),
     onSuccess: () => {
       toast.success("Workspace Created");
@@ -49,25 +49,25 @@ function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
     },
     onError: (error) => {
       let errorMessage = "Failed to create workspace";
-      
+
       if (error?.message?.includes("not unique")) {
-        errorMessage = "A workspace with this name already exists. Please choose a different name.";
+        errorMessage =
+          "A workspace with this name already exists. Please choose a different name.";
       } else if (error?.message) {
         errorMessage = error.message;
       }
-      
+
       form.setError("name", { message: errorMessage });
     },
   });
-  const { mutateAsync: generateUploadUrl, isPending: isUploadingFile } =
-    useMutation({
-      mutationFn: useConvexMutation(api.upload.generateUploadUrl),
-    });
+  const { mutateAsync: generateUploadUrl } = useMutation({
+    mutationFn: useConvexMutation(api.upload.generateUploadUrl),
+  });
   const onSubmit = async (values: z.infer<typeof createWorkspaceSchema>) => {
     setIsSubmitting(true);
     try {
       if (!values.thumbnail) {
-        mutate({ name: values.name });
+        await createWorkspaceAsync({ name: values.name });
         return;
       }
       const optimizedImage = await workspaecImageOptimization(values.thumbnail);
@@ -78,7 +78,7 @@ function CreateWorkSpaceForm({ onCancel }: CreateWorkspaceFormProps) {
         body: optimizedImage,
       });
       const { storageId } = await results.json();
-      mutate({ name: values.name, thumbnail: storageId });
+      await createWorkspaceAsync({ name: values.name, thumbnail: storageId });
     } finally {
       setIsSubmitting(false);
     }
