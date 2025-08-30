@@ -1,6 +1,7 @@
 "use client";
 
 import EditWorkspaceForm from "@/components/workspaces/edit-workspace-form";
+import WorkspaceInvite from "@/components/workspaces/workspace-invite";
 import { useWorkspaceId } from "@/hooks/use-workspace-id";
 import { convexQuery } from "@convex-dev/react-query";
 import { useSuspenseQuery } from "@tanstack/react-query";
@@ -22,8 +23,9 @@ function WorkspaceIdSettingsPage() {
     }),
   );
   return (
-    <div className="w-full lg:max-w-xl">
+    <div className="w-full lg:max-w-xl space-y-4">
       <EditWorkspaceForm initialValues={workspace} />
+      <WorkspaceInvite workspaceId={workspaceId as Id<"workspaces">} />
     </div>
   );
 }

@@ -18,12 +18,15 @@ export default defineSchema({
     role: workspaceRoleValidator,
   })
     .index("by_userId", ["userId"])
-    .index("by_workspaceId", ["workspaceId"]),
+    .index("by_workspaceId", ["workspaceId"])
+    .index("by_workspaceId_userId", ["workspaceId", "userId"]),
   workspaces: defineTable({
     name: v.string(),
     userId: v.id("users"),
     thumbnail: v.optional(v.id("_storage")),
+    inviteCode: v.optional(v.string()),
   })
     .index("by_userId", ["userId"])
-    .index("by_name", ["name"]),
+    .index("by_name", ["name"])
+    .index("by_inviteCode", ["inviteCode"]),
 });
