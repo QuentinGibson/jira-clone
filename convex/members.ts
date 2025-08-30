@@ -62,11 +62,14 @@ export const listWorkspaceMembers = query({
       .withIndex("by_workspaceId", (q) => q.eq("workspaceId", workspaceId))
       .collect();
 
-    return Promise.all(
+    const result = await Promise.all(
       members.map(async (memberId) => {
         return await ctx.db.get(memberId.userId);
       }),
     );
+
+    const filterNull = result.filter((res) => res !== null);
+    return filterNull;
   },
 });
 
