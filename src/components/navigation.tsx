@@ -11,6 +11,7 @@ import type { IconType } from "react-icons/lib";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "./ui/sidebar";
 import { useRouter, usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
 
 interface Route {
   label: string;
@@ -48,19 +49,22 @@ const routes: Route[] = [
 
 export const Navigation = () => {
   const pathname = usePathname();
+  const { workspaceId } = useWorkspaceId();
   return (
     <SidebarMenu className="flex flex-col">
       {routes.map((route) => {
         //Check if the href is the current link
-        const isActive =
-          pathname === route.href ||
-          (route.href !== "" && pathname.includes(route.href));
+        const fullHref = `/workspaces${route.href}`;
+        const paramsEndings = `?workspace=${workspaceId}`;
+        const isActive = pathname === fullHref;
+        console.log(`Pathname: ${pathname}`);
+        console.log(`Href: ${fullHref}`);
 
         const Icon = isActive ? route.activeIcon : route.icon;
         return (
           <SidebarMenuItem key={route.href}>
             <SidebarMenuButton asChild>
-              <a href={route.href}>
+              <a href={fullHref + paramsEndings}>
                 <div
                   className={cn(
                     "hover:text-primary flex items-center gap-2.5 rounded-md p-2.5 font-medium text-neutral-500 transition",

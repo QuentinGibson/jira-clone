@@ -18,9 +18,9 @@ export default function HomePage() {
     if (workspaces.length === 0) {
       router.push(`/workspaces/create`);
     } else {
-      setWorkspaceId(workspaces[0]?._id || "");
+      router.push(`/workspaces/?workspace=${workspaces[0]?._id}`);
     }
-  }, [workspaces, router, setWorkspaceId]);
+  }, [workspaces, router]);
 
   return <DashboardContainer>Home Page</DashboardContainer>;
 }

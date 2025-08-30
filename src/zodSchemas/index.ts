@@ -5,5 +5,14 @@ export const createWorkspaceSchema = z.object({
     .string()
     .min(3, "Name must be 3 characters or longer")
     .max(156, "Name must be under 156 characters"),
-  thumbnail: z.optional(z.instanceof(File)),
+  thumbnail: z.instanceof(File).optional(),
+});
+
+export const updateWorkspaceSchema = z.object({
+  name: z
+    .string()
+    .min(3, "Name must be 3 characters or longer")
+    .max(156, "Name must be under 156 characters")
+    .optional(),
+  thumbnail: z.instanceof(File).optional(),
 });
