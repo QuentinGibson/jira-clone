@@ -5,6 +5,10 @@ export enum WorkspaceRole {
   Member = "MEMBER",
 }
 
+export type TaskState = {
+  [key in TaskStatus]: TaskWithDetails[];
+};
+
 export enum TaskStatus {
   Backlog = "BACKLOG",
   Todo = "TODO",
@@ -12,4 +16,9 @@ export enum TaskStatus {
   In_Review = "IN_REVIEW",
   Done = "DONE",
 }
+
+export type TaskWithDetails = Doc<"tasks"> & {
+  assignee: Doc<"users">;
+  project: Doc<"projects">;
+};
 export type Workspace = Doc<"workspaces">;

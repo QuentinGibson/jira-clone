@@ -1,4 +1,3 @@
-import { i } from "node_modules/@clerk/clerk-react/dist/useAuth-BVxIa9U7.mjs";
 import type { TaskStatus } from "types";
 import { create } from "zustand";
 

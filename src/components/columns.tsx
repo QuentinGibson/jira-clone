@@ -8,13 +8,8 @@ import { MemberAvatar } from "./member-avatar";
 import TaskDate from "./task-date";
 import { Badge } from "./ui/badge";
 import { snakeCaseToTitleCase } from "@/lib/utils";
-import type { TaskStatus } from "types";
+import type { TaskStatus, TaskWithDetails } from "types";
 import TaskActions from "./task-actions";
-
-type TaskWithDetails = Doc<"tasks"> & {
-  assignee: Doc<"users">;
-  project: Doc<"projects">;
-};
 
 export const columns: ColumnDef<TaskWithDetails>[] = [
   {

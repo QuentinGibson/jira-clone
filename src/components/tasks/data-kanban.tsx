@@ -1,48 +1,34 @@
 "use client";
 
-import { useCallback, useState, useEffect, type ReactNode } from "react";
-import type { Doc } from "convex/_generated/dataModel";
-import { DragDropContext } from "@hello-pangea/dnd";
-import { TaskStatus } from "types";
+import {
+  DragDropContext,
+  Draggable,
+  Droppable,
+  type DropResult,
+} from "@hello-pangea/dnd";
+import { TaskStatus, type TaskWithDetails } from "types";
 import KanbanColumnHeader from "./kanban-column-header";
 
-import {
-  CircleCheckIcon,
-  CircleDashedIcon,
-  CircleDotDashedIcon,
-  CircleDotIcon,
-  CircleIcon,
-  PlusIcon,
-} from "lucide-react";
+import KanbanCard from "./kanban-card";
+import { useKanbanStore } from "@/hooks/use-kanban-store";
+import { useCallback, useEffect } from "react";
+import { useMutation } from "@tanstack/react-query";
+import { useConvexMutation } from "@convex-dev/react-query";
+import { api } from "convex/_generated/api";
+import type { Id } from "convex/_generated/dataModel";
+import { useWorkspaceId } from "@/hooks/use-workspace-id";
 
 interface DataKanbanProps {
-  data: Doc<"tasks">[];
+  data: TaskWithDetails[];
 }
 
-type TaskState = {
-  [key in TaskStatus]: Doc<"tasks">[];
-};
-
 export const DataKanban = ({ data }: DataKanbanProps) => {
-  const [tasks, setTasks] = useState<TaskState>(() => {
-    const initialTasks: TaskState = {
-      [TaskStatus.Backlog]: [],
-      [TaskStatus.Todo]: [],
-      [TaskStatus.In_Progress]: [],
-      [TaskStatus.In_Review]: [],
-      [TaskStatus.Done]: [],
-    };
-
-    data.forEach((task) => {
-      initialTasks[task.status].push(task);
-    });
-
-    Object.keys(initialTasks).forEach((key) => {
-      initialTasks[key as TaskStatus].sort((a, b) => a.position - b.position);
-    });
-
-    return initialTasks;
+  const { workspaceId } = useWorkspaceId();
+  const { setTasks, tasks, moveTask } = useKanbanStore();
+  const { mutate: updateTask } = useMutation({
+    mutationFn: useConvexMutation(api.tasks.edit),
   });
+
   const boards: TaskStatus[] = [
     TaskStatus.Backlog,
     TaskStatus.Todo,
@@ -51,8 +37,38 @@ export const DataKanban = ({ data }: DataKanbanProps) => {
     TaskStatus.Done,
   ];
 
+  // Initialize tasks when data changes
+  useEffect(() => {
+    setTasks(data);
+  }, [data, setTasks]);
+
+  const onDragEnd = useCallback(
+    (result: DropResult) => {
+      if (!result.destination) return;
+
+      const { source, destination, draggableId } = result;
+      const sourceStatus = source.droppableId as TaskStatus;
+      const destStatus = destination.droppableId as TaskStatus;
+
+      // Use the moveTask function from the store
+      moveTask(draggableId, sourceStatus, destStatus, destination.index);
+
+      // Calculate new position based on destination index
+      const newPosition = (destination.index + 1) * 1000; // Space positions by 1000
+
+      // Update the task in database
+      updateTask({
+        workspaceId: workspaceId,
+        taskId: draggableId as Id<"tasks">,
+        status: destStatus,
+        position: newPosition,
+      });
+    },
+    [moveTask, updateTask],
+  );
+
   return (
-    <DragDropContext onDragEnd={() => {}}>
+    <DragDropContext onDragEnd={onDragEnd}>
       <div className="flex overflow-x-auto">
         {boards.map((board) => {
           return (
@@ -61,6 +77,34 @@ export const DataKanban = ({ data }: DataKanbanProps) => {
                 board={board}
                 taskcount={tasks[board].length}
               />
+              <Droppable droppableId={board}>
+                {(provided) => (
+                  <div
+                    {...provided.droppableProps}
+                    ref={provided.innerRef}
+                    className="min-h-[200px] py-1.5"
+                  >
+                    {tasks[board].map((task, index) => (
+                      <Draggable
+                        key={task._id}
+                        draggableId={task._id}
+                        index={index}
+                      >
+                        {(provided) => (
+                          <div
+                            {...provided.draggableProps}
+                            {...provided.dragHandleProps}
+                            ref={provided.innerRef}
+                          >
+                            <KanbanCard task={task} />
+                          </div>
+                        )}
+                      </Draggable>
+                    ))}
+                    {provided.placeholder}
+                  </div>
+                )}
+              </Droppable>
             </div>
           );
         })}

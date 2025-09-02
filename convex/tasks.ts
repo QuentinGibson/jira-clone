@@ -226,7 +226,6 @@ export const remove = mutation({
 export const edit = mutation({
   args: {
     workspaceId: v.id("workspaces"),
-    projectId: v.id("projects"),
     taskId: v.id("tasks"),
     taskName: v.optional(v.string()),
     dueDate: v.optional(v.number()),
@@ -242,12 +241,12 @@ export const edit = mutation({
     ),
     description: v.optional(v.string()),
     taskProject: v.optional(v.id("projects")),
+    position: v.optional(v.number()),
   },
   handler: async (
     ctx,
     {
       workspaceId,
-      projectId,
       description,
       taskId,
       taskName,
@@ -255,6 +254,7 @@ export const edit = mutation({
       assigneeId,
       status,
       taskProject,
+      position,
     },
   ) => {
     const identity = await ctx.auth.getUserIdentity();
@@ -286,14 +286,16 @@ export const edit = mutation({
       throw new ConvexError("Task does not exist");
     }
 
-    await ctx.db.patch(taskId, {
-      name: taskName,
-      dueDate,
-      assigneeId,
-      description,
-      status,
-      projectId: taskProject,
-    });
+    const updates: any = {};
+    if (taskName !== undefined) updates.name = taskName;
+    if (dueDate !== undefined) updates.dueDate = dueDate;
+    if (assigneeId !== undefined) updates.assigneeId = assigneeId;
+    if (description !== undefined) updates.description = description;
+    if (status !== undefined) updates.status = status;
+    if (taskProject !== undefined) updates.projectId = taskProject;
+    if (position !== undefined) updates.position = position;
+
+    await ctx.db.patch(taskId, updates);
 
     console.log(`${oldTask.name} updated with new values!`);
   },
