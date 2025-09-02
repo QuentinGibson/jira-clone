@@ -17,6 +17,7 @@ import { useTaskFilters } from "@/hooks/use-task-filters";
 import type { Id } from "convex/_generated/dataModel";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
+import { DataKanban } from "./tasks/data-kanban";
 
 function TaskViewSwitcher() {
   const [view, setView] = useQueryState("task-view", {
@@ -71,7 +72,7 @@ function TaskViewSwitcher() {
           </TabsContent>
 
           <TabsContent value="kanban" className="mt-0">
-            {JSON.stringify(tasks)}
+            <DataKanban data={tasks} />
           </TabsContent>
           <TabsContent value="calendar" className="mt-0">
             {JSON.stringify(tasks)}

@@ -57,8 +57,6 @@ export const Navigation = () => {
         const fullHref = `/workspaces${route.href}`;
         const paramsEndings = `?workspace=${workspaceId}`;
         const isActive = pathname === fullHref;
-        console.log(`Pathname: ${pathname}`);
-        console.log(`Href: ${fullHref}`);
 
         const Icon = isActive ? route.activeIcon : route.icon;
         return (

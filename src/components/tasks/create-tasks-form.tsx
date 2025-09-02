@@ -41,12 +41,14 @@ interface CreateTaskFormProps {
   onCancel?: () => void;
   projectOptions: { _id: string; name: string; imageUrl: string | null }[];
   memberOptions: { _id: string; name: string }[];
+  initialStatus?: TaskStatus;
 }
 
 function CreateTaskForm({
   onCancel,
   projectOptions,
   memberOptions,
+  initialStatus,
 }: CreateTaskFormProps) {
   const { projectId } = useProjectId();
   const { workspaceId } = useWorkspaceId();
@@ -60,7 +62,7 @@ function CreateTaskForm({
       projectId: projectId || "",
       assigneeId: "",
       description: "",
-      status: TaskStatus.Backlog,
+      status: initialStatus,
       dueDate: new Date().getTime(),
     },
   });

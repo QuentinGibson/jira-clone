@@ -8,12 +8,17 @@ import { Card, CardContent } from "../ui/card";
 import { Loader } from "lucide-react";
 import { Suspense } from "react";
 import CreateTaskForm from "./create-tasks-form";
+import type { TaskStatus } from "types";
 
 interface CreateFormWrapperProps {
   onCancel: () => void;
+  initialStatus?: TaskStatus;
 }
 
-function CreateFormWrapper({ onCancel }: CreateFormWrapperProps) {
+function CreateFormWrapper({
+  onCancel,
+  initialStatus,
+}: CreateFormWrapperProps) {
   const { workspaceId } = useWorkspaceId();
   const { projectId } = useProjectId();
 
@@ -48,6 +53,7 @@ function CreateFormWrapper({ onCancel }: CreateFormWrapperProps) {
         projectOptions={projectOptions}
         memberOptions={memberOptions}
         onCancel={onCancel}
+        initialStatus={initialStatus}
       />
     </Suspense>
   );
