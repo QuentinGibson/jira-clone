@@ -91,6 +91,7 @@ function EditTaskForm({
     try {
       await updateTaskAsync({
         taskId: initialValues._id,
+        taskProject: projectId,
         description: values.description,
         projectId: values.projectId as Id<"projects">,
         taskName: values.name,
