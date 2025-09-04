@@ -14,6 +14,7 @@ import type { TaskStatus, TaskWithDetails } from "types";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "@/styles/data-calendar.css";
 import EventCard from "./event-card";
+import CustomToolbar from "./custom-toolbar";
 
 interface DataCalandarProps {
   data: TaskWithDetails[];
@@ -81,6 +82,9 @@ function DataCalendar({ data }: DataCalandarProps) {
               project={event.project}
               status={event.status as TaskStatus}
             />
+          ),
+          toolbar: () => (
+            <CustomToolbar date={values} onNavigate={handleNavigation} />
           ),
         }}
       />
