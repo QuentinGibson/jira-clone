@@ -17,7 +17,7 @@ function KanbanCard({ task }: KanbanCardProps) {
   const { projectId } = useProjectId();
   const { workspaceId } = useWorkspaceId();
   return (
-    <div className="mb-1.5 space-y-3 rounded bg-white p-2.5 shadow-sm">
+    <div className="flex min-h-[120px] flex-col justify-between space-y-3 rounded bg-white p-2.5 shadow-sm">
       <div className="flex items-start justify-between gap-x-2">
         <p>{task.name}</p>
         <TaskActions

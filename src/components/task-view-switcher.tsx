@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { Loader, PlusIcon } from "lucide-react";
 import { Separator } from "./ui/separator";
 import { useCreateTaskModal } from "@/hooks/use-create-task-modal";
-import { useQuery, useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { api } from "convex/_generated/api";
 import { convexQuery } from "@convex-dev/react-query";
 import { useProjectId } from "@/hooks/use-project-id";
@@ -18,6 +18,7 @@ import type { Id } from "convex/_generated/dataModel";
 import { DataTable } from "./data-table";
 import { columns } from "./columns";
 import { DataKanban } from "./tasks/data-kanban";
+import DataCalendar from "./data-calender";
 
 function TaskViewSwitcher() {
   const [view, setView] = useQueryState("task-view", {
@@ -74,8 +75,8 @@ function TaskViewSwitcher() {
           <TabsContent value="kanban" className="mt-0">
             <DataKanban data={tasks} />
           </TabsContent>
-          <TabsContent value="calendar" className="mt-0">
-            {JSON.stringify(tasks)}
+          <TabsContent value="calendar" className="mt-0 h-full pb-4">
+            <DataCalendar data={tasks} />
           </TabsContent>
         </Suspense>
       </div>
